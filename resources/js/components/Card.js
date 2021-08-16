@@ -9,7 +9,7 @@ Vue.component('board-section-card', {
     },
     data() {
         return {
-            record: null,
+            record: null
         }
     },
     mounted() {

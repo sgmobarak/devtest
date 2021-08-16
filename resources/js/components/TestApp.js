@@ -10,6 +10,14 @@ const app = new Vue({
         sections: [],
         section: null
     },
+    watch: {
+        sections: {
+            handler: function (val, oldVal) {
+                // do nothing
+            },
+            deep: true
+        }
+    },
     mounted() {
         let vm = this;
 
@@ -97,7 +105,6 @@ const app = new Vue({
         sectionRemoved(section) {
             let vm = this;
             if (section && section.id) {
-                // updating view
                 const i = vm.sections.indexOf(section);
                 vm.sections.splice(i, 1);
                 vm.updateStore();
@@ -105,10 +112,14 @@ const app = new Vue({
         },
         sectionUpdated(section) {
             let vm = this;
-            if (section && section.id) {
-                // updating view
-                const i = vm.sections.indexOf(section);
-                vm.sections[i] = section;
+            if (Array.isArray(vm.sections) && section && section.id) {
+                let i = vm.sections.findIndex(function (c) {
+                    return c.id === section.id;
+                });
+
+                console.log(section)
+                if (i > -1) vm.sections[i] = section;
+
                 vm.updateStore();
             }
         },

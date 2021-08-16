@@ -1,8 +1,8 @@
-const { isArray } = require('lodash');
-
 require('./Card');
 
 const Vue = window.vue;
+
+Vue.use(window.VueJSModal);
 
 Vue.component('board-section', {
     props: {
@@ -38,6 +38,83 @@ Vue.component('board-section', {
         }
     },
     methods: {
+        openCardModal() {
+            let vm = this;
+
+            this.$modal.show({
+                template: `<div class="dialog-content">
+                    <form v-if="record && record.id" class="form" @submit.prevent="updateCard()">
+                        <textarea :ref="'input_title'" class="form_input" v-model="record.title" placeholder="Title" />
+                        <textarea :ref="'input_description'" class="form_input" v-model="record.description" placeholder="Description" />
+                        <div class="form__buttons">
+                            <button type="button" class="form_button" @click.prevent="closeModal()">Cancel</button>
+                            <button type="submit" class="form_button form_button--active">Save</button>
+                        </div>
+                    </form>
+                </div>`,
+                props: {
+                    card: {
+                        type: Object,
+                        default: null
+                    },
+                },
+                data() {
+                    return {
+                        record: null
+                    }
+                },
+                mounted() {
+                    if (this.card) {
+                        this.record = JSON.parse(JSON.stringify(this.card));
+                    }
+                },
+                methods: {
+                    closeModal() {
+                        vm.$modal.hide('cardEditor');
+                    },
+                    updateCard() {
+                        let mvm = this;
+
+                        // ensure user actually typed something
+                        if (!mvm.record) {
+                            return;
+                        }
+
+                        if (mvm.record.title == '') {
+                            alert('Please enter card title');
+                            return;
+                        }
+
+                        // call api to save
+                        axios
+                            .put('/api/cards/' + mvm.record.id, mvm.record)
+                            .then(response => {
+                                const card = response.data;
+
+                                // let the parent know about this action
+                                vm.cardUpdated(card);
+
+                                // close the modal
+                                mvm.closeModal();
+                            })
+                            .catch(error => {
+                                alert('Oops! Something went wrong.')
+                            })
+                            .finally(() => {
+                                // do nothing
+                            })
+                    },
+                }
+            }, {
+                card: vm.card
+            }, {
+                name: "cardEditor",
+                adaptive: true,
+                clickToClose: false
+            }, {
+                'before-close': vm.cancelCard
+            })
+        },
         remove() {
             let vm = this;
             if (confirm('Are you sure to delete this section?')) {
@@ -46,8 +123,6 @@ Vue.component('board-section', {
                 axios
                     .post('/api/sections/' + vm.section.id, { _method: 'DELETE' })
                     .then(response => {
-                        console.log(response);
-
                         // let the parent know about this action
                         vm.$emit('deleted', vm.section);
                     })
@@ -72,15 +147,15 @@ Vue.component('board-section', {
                 description: ''
             };
         },
-        saveCard() {
+        storeCard() {
             let vm = this;
 
             // ensure user actually typed something
-            if (!this.card) {
+            if (!vm.card) {
                 return;
             }
 
-            if (this.card.title == '') {
+            if (vm.card.title == '') {
                 alert('Please enter card title');
                 return;
             }
@@ -106,6 +181,14 @@ Vue.component('board-section', {
 
 
         },
+        editCard(c) {
+            if (!c) {
+                return;
+            }
+
+            this.card = c;
+            this.openCardModal();
+        },
         cardRemoved(card) {
             let vm = this;
             if (vm.record.cards && card && card.id) {
@@ -118,9 +201,17 @@ Vue.component('board-section', {
         },
         cardUpdated(card) {
             let vm = this;
-            if (vm.record.cards && card && card.id) {
-                const i = vm.record.cards.indexOf(card);
-                vm.record.cards[i] = card;
+            let cards = JSON.parse(JSON.stringify(vm.record.cards));
+
+            if (Array.isArray(cards) && card && card.id) {
+                console.log(card)
+                let i = cards.findIndex(function (c) {
+                    return c.id === card.id;
+                });
+
+                if (i > -1) cards[i] = card;
+
+                vm.record.cards = JSON.parse(JSON.stringify(cards));
 
                 // let the parent know about this action
                 vm.$emit('updated', vm.record);
@@ -139,7 +230,7 @@ Vue.component('board-section', {
         </div>
         <div class="column__content__body">
             <div v-if="hasCards==true">
-                <div v-for="rec in getCards" :key="'card_' + rec.id">
+                <div v-for="rec in getCards" :key="'card_' + rec.id" @click.prevent="editCard(rec)">
                     <board-section-card :card="rec" @deleted="cardRemoved" @updated="cardUpdated" />
                 </div>
             </div>
@@ -152,7 +243,7 @@ Vue.component('board-section', {
                 </p>
             </div>
 
-            <form v-if="card!=null" class="form" @submit.prevent="saveCard()">
+            <form v-if="card!=null && card.id==''" class="form" @submit.prevent="storeCard()">
                 <textarea :ref="'input_title'" class="form_input" v-model="card.title" placeholder="Title" />
                 <button type="button" class="form_button" @click.prevent="cancelCard()">Cancel</button>
                 <button type="submit" class="form_button form_button--active">Save</button>

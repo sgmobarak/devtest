@@ -61,7 +61,27 @@ class ApiCardController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $model =
+            Card::findOrFail($id);
+
+        $request->validate([
+            'title' => 'required|max:255',
+            'section_id' => 'required|integer',
+            'description' => 'nullable'
+        ]);
+
+        try {
+            $model->title = $request->post('title');
+            $model->section_id = $request->post('section_id');
+            $model->description = $request->post('description');
+
+            $model->save();
+        } catch (\Exception $e) {
+            // for now throw the exception
+            throw $e;
+        }
+
+        return $model;
     }
 
     /**
@@ -73,8 +93,7 @@ class ApiCardController extends Controller
     public function destroy($id)
     {
         $model =
-            Card::ofUser(auth()->user())
-            ->findOrFail($id);
+            Card::findOrFail($id);
 
         try {
             // delete from the database

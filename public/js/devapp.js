@@ -1850,7 +1850,7 @@ window._ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
 window.axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 window.vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js").default;
-window.VModal = __webpack_require__(/*! vue-js-modal */ "./node_modules/vue-js-modal/dist/index.js").default;
+window.VueJSModal = __webpack_require__(/*! vue-js-modal */ "./node_modules/vue-js-modal/dist/index.js").default;
 /**
  * Echo exposes an expressive API for subscribing to channels and listening
  * for events that are broadcast by Laravel. Echo and event broadcasting
@@ -1923,12 +1923,10 @@ Vue.component('board-section-card', {
   \********************************************/
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
 
-var _require = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js"),
-    isArray = _require.isArray;
-
 __webpack_require__(/*! ./Card */ "./resources/js/components/Card.js");
 
 var Vue = window.vue;
+Vue.use(window.VueJSModal);
 Vue.component('board-section', {
   props: {
     section: {
@@ -1960,6 +1958,65 @@ Vue.component('board-section', {
     }
   },
   methods: {
+    openCardModal: function openCardModal() {
+      var vm = this;
+      this.$modal.show({
+        template: "<div class=\"dialog-content\">\n                    <form v-if=\"record && record.id\" class=\"form\" @submit.prevent=\"updateCard()\">\n                        <textarea :ref=\"'input_title'\" class=\"form_input\" v-model=\"record.title\" placeholder=\"Title\" />\n                        <textarea :ref=\"'input_description'\" class=\"form_input\" v-model=\"record.description\" placeholder=\"Description\" />\n                        <div class=\"form__buttons\">\n                            <button type=\"button\" class=\"form_button\" @click.prevent=\"closeModal()\">Cancel</button>\n                            <button type=\"submit\" class=\"form_button form_button--active\">Save</button>\n                        </div>\n                    </form>\n                </div>",
+        props: {
+          card: {
+            type: Object,
+            "default": null
+          }
+        },
+        data: function data() {
+          return {
+            record: null
+          };
+        },
+        mounted: function mounted() {
+          if (this.card) {
+            this.record = JSON.parse(JSON.stringify(this.card));
+          }
+        },
+        methods: {
+          closeModal: function closeModal() {
+            vm.$modal.hide('cardEditor');
+          },
+          updateCard: function updateCard() {
+            var mvm = this; // ensure user actually typed something
+
+            if (!mvm.record) {
+              return;
+            }
+
+            if (mvm.record.title == '') {
+              alert('Please enter card title');
+              return;
+            } // call api to save
+
+
+            axios.put('/api/cards/' + mvm.record.id, mvm.record).then(function (response) {
+              var card = response.data; // let the parent know about this action
+
+              vm.cardUpdated(card); // close the modal
+
+              mvm.closeModal();
+            })["catch"](function (error) {
+              alert('Oops! Something went wrong.');
+            })["finally"](function () {// do nothing
+            });
+          }
+        }
+      }, {
+        card: vm.card
+      }, {
+        name: "cardEditor",
+        adaptive: true,
+        clickToClose: false
+      }, {
+        'before-close': vm.cancelCard
+      });
+    },
     remove: function remove() {
       var vm = this;
 
@@ -1968,8 +2025,7 @@ Vue.component('board-section', {
         axios.post('/api/sections/' + vm.section.id, {
           _method: 'DELETE'
         }).then(function (response) {
-          console.log(response); // let the parent know about this action
-
+          // let the parent know about this action
           vm.$emit('deleted', vm.section);
         })["catch"](function (error) {
           console.log(error.response); // do nothing
@@ -1989,14 +2045,14 @@ Vue.component('board-section', {
         description: ''
       };
     },
-    saveCard: function saveCard() {
+    storeCard: function storeCard() {
       var vm = this; // ensure user actually typed something
 
-      if (!this.card) {
+      if (!vm.card) {
         return;
       }
 
-      if (this.card.title == '') {
+      if (vm.card.title == '') {
         alert('Please enter card title');
         return;
       } // call api to save
@@ -2014,6 +2070,14 @@ Vue.component('board-section', {
       })["finally"](function () {// do nothing
       });
     },
+    editCard: function editCard(c) {
+      if (!c) {
+        return;
+      }
+
+      this.card = c;
+      this.openCardModal();
+    },
     cardRemoved: function cardRemoved(card) {
       var vm = this;
 
@@ -2026,16 +2090,21 @@ Vue.component('board-section', {
     },
     cardUpdated: function cardUpdated(card) {
       var vm = this;
+      var cards = JSON.parse(JSON.stringify(vm.record.cards));
 
-      if (vm.record.cards && card && card.id) {
-        var i = vm.record.cards.indexOf(card);
-        vm.record.cards[i] = card; // let the parent know about this action
+      if (Array.isArray(cards) && card && card.id) {
+        console.log(card);
+        var i = cards.findIndex(function (c) {
+          return c.id === card.id;
+        });
+        if (i > -1) cards[i] = card;
+        vm.record.cards = JSON.parse(JSON.stringify(cards)); // let the parent know about this action
 
         vm.$emit('updated', vm.record);
       }
     }
   },
-  template: "\n    <div class=\"column__content\" v-if=\"record && record.title\">\n        <div class=\"column__content__header\">\n            <div class=\"column__content__header__buttons\">\n                <a href=\"#\" @click.prevent=\"remove()\">\n                    Delete\n                </a>\n            </div>\n            {{ record.title }}\n        </div>\n        <div class=\"column__content__body\">\n            <div v-if=\"hasCards==true\">\n                <div v-for=\"rec in getCards\" :key=\"'card_' + rec.id\">\n                    <board-section-card :card=\"rec\" @deleted=\"cardRemoved\" @updated=\"cardUpdated\" />\n                </div>\n            </div>\n            <div v-else-if=\"card==null\">\n                <p>\n                    No cards yet. \n                    <a href=\"#\" @click.prevent=\"createCard()\">\n                        Get Started\n                    </a>\n                </p>\n            </div>\n\n            <form v-if=\"card!=null\" class=\"form\" @submit.prevent=\"saveCard()\">\n                <textarea :ref=\"'input_title'\" class=\"form_input\" v-model=\"card.title\" placeholder=\"Title\" />\n                <button type=\"button\" class=\"form_button\" @click.prevent=\"cancelCard()\">Cancel</button>\n                <button type=\"submit\" class=\"form_button form_button--active\">Save</button>\n            </form>\n        </div>\n        <div class=\"column__content__footer\">\n            <a href=\"#\" @click.prevent=\"createCard()\">\n                Add Card\n            </a>\n        </div>\n    </div>\n    "
+  template: "\n    <div class=\"column__content\" v-if=\"record && record.title\">\n        <div class=\"column__content__header\">\n            <div class=\"column__content__header__buttons\">\n                <a href=\"#\" @click.prevent=\"remove()\">\n                    Delete\n                </a>\n            </div>\n            {{ record.title }}\n        </div>\n        <div class=\"column__content__body\">\n            <div v-if=\"hasCards==true\">\n                <div v-for=\"rec in getCards\" :key=\"'card_' + rec.id\" @click.prevent=\"editCard(rec)\">\n                    <board-section-card :card=\"rec\" @deleted=\"cardRemoved\" @updated=\"cardUpdated\" />\n                </div>\n            </div>\n            <div v-else-if=\"card==null\">\n                <p>\n                    No cards yet. \n                    <a href=\"#\" @click.prevent=\"createCard()\">\n                        Get Started\n                    </a>\n                </p>\n            </div>\n\n            <form v-if=\"card!=null && card.id==''\" class=\"form\" @submit.prevent=\"storeCard()\">\n                <textarea :ref=\"'input_title'\" class=\"form_input\" v-model=\"card.title\" placeholder=\"Title\" />\n                <button type=\"button\" class=\"form_button\" @click.prevent=\"cancelCard()\">Cancel</button>\n                <button type=\"submit\" class=\"form_button form_button--active\">Save</button>\n            </form>\n        </div>\n        <div class=\"column__content__footer\">\n            <a href=\"#\" @click.prevent=\"createCard()\">\n                Add Card\n            </a>\n        </div>\n    </div>\n    "
 });
 
 /***/ }),
@@ -2056,6 +2125,13 @@ var app = new Vue({
     loading: false,
     sections: [],
     section: null
+  },
+  watch: {
+    sections: {
+      handler: function handler(val, oldVal) {// do nothing
+      },
+      deep: true
+    }
   },
   mounted: function mounted() {
     var vm = this;
@@ -2136,7 +2212,6 @@ var app = new Vue({
       var vm = this;
 
       if (section && section.id) {
-        // updating view
         var i = vm.sections.indexOf(section);
         vm.sections.splice(i, 1);
         vm.updateStore();
@@ -2145,10 +2220,12 @@ var app = new Vue({
     sectionUpdated: function sectionUpdated(section) {
       var vm = this;
 
-      if (section && section.id) {
-        // updating view
-        var i = vm.sections.indexOf(section);
-        vm.sections[i] = section;
+      if (Array.isArray(vm.sections) && section && section.id) {
+        var i = vm.sections.findIndex(function (c) {
+          return c.id === section.id;
+        });
+        console.log(section);
+        if (i > -1) vm.sections[i] = section;
         vm.updateStore();
       }
     },

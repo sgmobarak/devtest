@@ -12,7 +12,7 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 window.vue = require('vue').default;
 
-window.VModal = require('vue-js-modal').default;
+window.VueJSModal = require('vue-js-modal').default;
 
 
 /**
