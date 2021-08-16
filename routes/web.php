@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,8 +28,13 @@ Route::get('/dashboard', function () {
 ->middleware(['auth'])->name('dashboard');
 */
 
-Route::get('/dashboard', [HomeController::class, 'index'])
-    ->middleware('auth')
-    ->name('dashboard');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [HomeController::class, 'index'])
+        ->name('dashboard');
+
+    Route::get('/download/dbdump', [DownloadController::class, 'getSqlDump'])
+        ->name('download.dbdump');
+});
+
 
 require __DIR__ . '/auth.php';

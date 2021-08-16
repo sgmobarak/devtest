@@ -33,15 +33,22 @@
                 DEV TEST
             </h5>
 
-            @if(auth()->check())
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <a href="route('logout')" onclick="event.preventDefault();
-                                    this.closest('form').submit();">
-                    {{ __('Log Out') }}
+            <div class="header__nav">
+                @if(auth()->check())
+                <form class="header__nav_item" method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <a href="route('logout')" onclick="event.preventDefault();
+                                        this.closest('form').submit();">
+                        {{ __('Log Out') }}
+                    </a>
+                </form>
+                @endif
+
+                <a class="header__nav_item" href="{{route('download.dbdump')}}">
+                    Download DB
                 </a>
-            </form>
-            @endif
+            </div>
+
         </div>
     </div>
 
