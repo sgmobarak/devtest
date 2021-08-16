@@ -1,0 +1,200 @@
+.clearfix {
+    @include clearfix();
+}
+
+.shadow {
+    box-shadow: $box-shadow;
+}
+.shadow-inset {
+    box-shadow: $box-shadow-inset;
+}
+
+@each $key, $space in $spaces {
+    .m-#{$key} {
+        margin: $space !important;
+    }
+    .my-#{$key} {
+        margin: 0 !important;
+        margin-top: $space !important;
+        margin-bottom: $space !important;
+    }
+    .mx-#{$key} {
+        margin: 0 !important;
+        margin-left: $space !important;
+        margin-right: $space !important;
+    }
+    .ms-#{$key} {
+        margin: 0 !important;
+        margin-left: $space !important;
+    }
+    .me-#{$key} {
+        margin: 0 !important;
+        margin-right: $space !important;
+    }
+
+    .p-#{$key} {
+        padding: $space !important;
+    }
+    .py-#{$key} {
+        padding: 0 !important;
+        padding-top: $space !important;
+        padding-bottom: $space !important;
+    }
+    .px-#{$key} {
+        padding: 0 !important;
+        padding-left: $space !important;
+        padding-right: $space !important;
+    }
+    .ps-#{$key} {
+        padding: 0 !important;
+        padding-left: $space !important;
+    }
+    .pe-#{$key} {
+        padding: 0 !important;
+        padding-right: $space !important;
+    }
+}
+
+@each $key, $color in $colors {
+    .text-#{$key} {
+        color: $color !important;
+    }
+}
+
+// header block
+.header {
+    background: rgba(0, 0, 0, 0.4);
+
+    &__wrapper {
+        padding: map_get($spaces, "2");
+    }
+
+    &__logo {
+        color: $white;
+    }
+}
+
+// content block
+.content {
+    flex-grow: 1;
+    position: relative;
+    background: rgba(0, 0, 0, 0.25);
+    height: 90vh;
+    overflow-y: hidden;
+
+    &__body {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+
+        &__board {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            margin-right: 0;
+            position: relative;
+            padding: map_get($spaces, "2");
+            padding-bottom: 0;
+
+            &__canvas {
+                position: relative;
+                flex-grow: 1;
+
+                &__area {
+                    user-select: none;
+                    white-space: nowrap;
+                    padding-bottom: 10px;
+                    margin-bottom: 10px;
+                    overflow-x: auto;
+                    overflow-y: hidden;
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    left: 0;
+                }
+            }
+        }
+    }
+}
+
+// column block
+.column {
+    width: 300px;
+    margin: 0 0.25rem;
+    height: 100%;
+    box-sizing: border-box;
+    display: inline-block;
+    vertical-align: top;
+    white-space: nowrap;
+
+    &:first-child {
+        margin-left: 0rem;
+    }
+
+    &__content {
+        background-color: map_get($grays, "300");
+        border-radius: $border-radius;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        max-height: 100%;
+        position: relative;
+        white-space: normal;
+
+        &__header {
+            position: relative;
+            flex: 0 0 auto;
+            padding: 10px 8px;
+            padding-right: 36px;
+            min-height: 20px;
+            font-weight: $font-weight-bold;
+
+            &__buttons {
+                position: absolute;
+                top: 10px;
+                right: 8px;
+                z-index: 10;
+                font-weight: normal;
+            }
+        }
+        &__body {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            overflow-x: hidden;
+            margin: 0 4px;
+            padding: 0 4px;
+            z-index: 1;
+            min-height: 50px;
+            background-color: map_get($grays, "200");
+        }
+        &__footer {
+            height: 40px;
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            padding-right: 36px;
+        }
+    }
+}
+
+// card block
+.card {
+    background: $white;
+    padding: map_get($spaces, "2");
+    border-radius: $border-radius;
+    box-shadow: $box-shadow;
+    margin-top: map_get($spaces, "3");
+    margin-bottom: map_get($spaces, "3");
+
+    &__body {
+        display: block;
+        cursor: pointer;
+
+        &__title {
+            display: block;
+        }
+    }
+}

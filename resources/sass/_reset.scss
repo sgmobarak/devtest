@@ -1,0 +1,383 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+:root {
+    font-size: $font-size-root;
+
+    @media (prefers-reduced-motion: no-preference) {
+        scroll-behavior: smooth;
+    }
+}
+
+body {
+    margin: 0;
+    font-family: $body-font-family;
+    font-size: $body-font-size;
+    font-weight: $body-font-weight;
+    line-height: $body-line-height;
+    color: $body-color;
+    text-align: left;
+    background-color: $body-bg;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: rgba($black, 0);
+}
+
+hr {
+    margin: $hr-margin-y 0;
+    color: $hr-color;
+    background-color: $gray-300;
+    border: 0;
+    opacity: $hr-opacity;
+}
+
+hr:not([size]) {
+    height: $hr-height;
+}
+
+%heading {
+    margin-top: 0;
+    margin-bottom: $headings-margin-bottom;
+    font-family: $headings-font-family;
+    font-style: $headings-font-style;
+    font-weight: $headings-font-weight;
+    line-height: $headings-line-height;
+    color: $headings-color;
+}
+
+h1 {
+    @extend %heading;
+    @include font-size($h1-font-size);
+}
+
+h2 {
+    @extend %heading;
+    @include font-size($h2-font-size);
+}
+
+h3 {
+    @extend %heading;
+    @include font-size($h3-font-size);
+}
+
+h4 {
+    @extend %heading;
+    @include font-size($h4-font-size);
+}
+
+h5 {
+    @extend %heading;
+    @include font-size($h5-font-size);
+}
+
+h6 {
+    @extend %heading;
+    @include font-size($h6-font-size);
+}
+
+p {
+    margin-top: 0;
+    margin-bottom: $paragraph-margin-bottom;
+}
+
+abbr[title],
+abbr[data-bs-original-title] {
+    text-decoration: underline dotted;
+    cursor: help;
+    text-decoration-skip-ink: none;
+}
+
+address {
+    margin-bottom: 1rem;
+    font-style: normal;
+    line-height: inherit;
+}
+
+ol,
+ul {
+    padding-left: 2rem;
+}
+
+ol,
+ul,
+dl {
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+ol ol,
+ul ul,
+ol ul,
+ul ol {
+    margin-bottom: 0;
+}
+
+dt {
+    font-weight: $font-weight-normal;
+}
+
+dd {
+    margin-bottom: 0.5rem;
+    margin-left: 0;
+}
+
+blockquote {
+    margin: 0 0 1rem;
+}
+
+b,
+strong {
+    font-weight: $font-weight-bold;
+}
+
+small {
+    @include font-size($small-font-size);
+}
+
+sub,
+sup {
+    position: relative;
+    @include font-size($sub-sup-font-size);
+    line-height: 0;
+    vertical-align: baseline;
+}
+
+sub {
+    bottom: -0.25em;
+}
+sup {
+    top: -0.5em;
+}
+
+a {
+    color: $link-color;
+    text-decoration: $link-decoration;
+
+    &:hover {
+        color: $link-hover-color;
+        text-decoration: $link-hover-decoration;
+    }
+}
+
+a:not([href]):not([class]) {
+    &,
+    &:hover {
+        color: inherit;
+        text-decoration: none;
+    }
+}
+
+pre,
+code {
+    font-family: $font-family-code;
+    @include font-size(1em);
+    direction: ltr #{"/* rtl:ignore */"};
+    unicode-bidi: bidi-override;
+}
+
+pre {
+    display: block;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    overflow: auto;
+    @include font-size($code-font-size);
+    color: inherit !important;
+
+    code {
+        @include font-size(inherit);
+        color: inherit;
+        word-break: normal;
+    }
+}
+
+code {
+    @include font-size($code-font-size);
+    color: $code-color;
+    word-wrap: break-word;
+
+    a > & {
+        color: inherit;
+    }
+}
+
+figure {
+    margin: 0 0 1rem;
+}
+
+img,
+svg {
+    vertical-align: middle;
+}
+
+table {
+    caption-side: bottom;
+    border-collapse: collapse;
+}
+
+caption {
+    padding-top: $table-cell-padding-y;
+    padding-bottom: $table-cell-padding-y;
+    color: $table-caption-color;
+    text-align: left;
+}
+
+th {
+    font-weight: $table-th-font-weight;
+    text-align: inherit;
+    text-align: -webkit-match-parent;
+}
+
+thead,
+tbody,
+tfoot,
+tr,
+td,
+th {
+    border-color: inherit;
+    border-style: solid;
+    border-width: 0;
+}
+
+label {
+    display: inline-block;
+}
+
+button {
+    border-radius: 0;
+}
+
+button:focus:not(:focus-visible) {
+    outline: 0;
+}
+
+input,
+button,
+select,
+optgroup,
+textarea {
+    margin: 0;
+    font-family: inherit;
+    @include font-size(inherit);
+    line-height: inherit;
+}
+
+button,
+select {
+    text-transform: none;
+}
+
+[role="button"] {
+    cursor: pointer;
+}
+
+select {
+    word-wrap: normal;
+
+    &:disabled {
+        opacity: 1;
+    }
+}
+
+[list]::-webkit-calendar-picker-indicator {
+    display: none;
+}
+
+button,
+[type="button"],
+[type="reset"],
+[type="submit"] {
+    -webkit-appearance: button;
+
+    &:not(:disabled) {
+        cursor: pointer;
+    }
+}
+
+::-moz-focus-inner {
+    padding: 0;
+    border-style: none;
+}
+
+textarea {
+    resize: vertical;
+}
+
+fieldset {
+    min-width: 0;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+legend {
+    float: left;
+    width: 100%;
+    padding: 0;
+    margin-bottom: 1rem;
+    @include font-size(inherit);
+    font-weight: 500;
+    line-height: inherit;
+
+    + * {
+        clear: left;
+    }
+}
+
+::-webkit-datetime-edit-fields-wrapper,
+::-webkit-datetime-edit-text,
+::-webkit-datetime-edit-minute,
+::-webkit-datetime-edit-hour-field,
+::-webkit-datetime-edit-day-field,
+::-webkit-datetime-edit-month-field,
+::-webkit-datetime-edit-year-field {
+    padding: 0;
+}
+
+::-webkit-inner-spin-button {
+    height: auto;
+}
+
+[type="search"] {
+    outline-offset: -2px;
+    -webkit-appearance: textfield;
+}
+
+::-webkit-search-decoration {
+    -webkit-appearance: none;
+}
+
+::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+::file-selector-button {
+    font: inherit;
+}
+
+::-webkit-file-upload-button {
+    font: inherit;
+    -webkit-appearance: button;
+}
+
+output {
+    display: inline-block;
+}
+
+iframe {
+    border: 0;
+}
+
+summary {
+    display: list-item;
+    cursor: pointer;
+}
+
+progress {
+    vertical-align: baseline;
+}
+
+[hidden] {
+    display: none !important;
+}
