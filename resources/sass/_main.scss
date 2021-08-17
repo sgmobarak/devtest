@@ -1,12 +1,34 @@
+%shadow {
+    box-shadow: $box-shadow;
+}
+
+%shadow-inset {
+    box-shadow: $box-shadow-inset;
+}
+
+%button {
+    padding: map_get($spaces, "4") map_get($spaces, "1");
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    background: $gray-200;
+    color: $gray-900;
+}
+
+%button-active {
+    background: $blue;
+    color: $white;
+}
+
 .clearfix {
     @include clearfix();
 }
 
 .shadow {
-    box-shadow: $box-shadow;
+    @extend %shadow;
 }
+
 .shadow-inset {
-    box-shadow: $box-shadow-inset;
+    @extend %shadow-inset;
 }
 
 @each $key, $space in $spaces {
@@ -63,14 +85,26 @@
 
 // header block
 .header {
-    background: rgba(0, 0, 0, 0.4);
+    @extend %shadow;
+    background: rgba(255, 255, 255, 0.99);
 
     &__wrapper {
         padding: map_get($spaces, "2");
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
 
     &__logo {
-        color: $white;
+        color: $gray-900;
+    }
+
+    &__nav {
+        display: inline-flex;
+
+        &__item {
+            margin: map_get($spaces, "4") map_get($spaces, "3");
+        }
     }
 }
 
@@ -78,7 +112,6 @@
 .content {
     flex-grow: 1;
     position: relative;
-    background: rgba(0, 0, 0, 0.25);
     height: 90vh;
     overflow-y: hidden;
 
@@ -152,6 +185,10 @@
             min-height: 20px;
             font-weight: $font-weight-bold;
 
+            &--new {
+                padding-right: 8px;
+            }
+
             &__buttons {
                 position: absolute;
                 top: 10px;
@@ -196,5 +233,54 @@
         &__title {
             display: block;
         }
+    }
+}
+
+// form block
+.form {
+    margin: 0;
+    padding: map_get($spaces, "2");
+    background: $white;
+
+    &__controls {
+        margin-bottom: map_get($spaces, "1");
+        &__input {
+            width: 100%;
+            padding: map_get($spaces, "4");
+            border: 1px solid $border-color;
+            border-radius: $border-radius;
+            outline-color: $border-color;
+
+            &:focus-visible {
+                outline-color: $border-color;
+            }
+        }
+    }
+
+    &__buttons {
+        margin-top: map_get($spaces, "1");
+        margin-bottom: map_get($spaces, "2");
+        border-radius: $border-radius;
+
+        &__button {
+            @extend %button;
+
+            &--active {
+                @extend %button-active;
+            }
+        }
+    }
+
+    &--card,
+    &--section {
+        margin: 0;
+        padding: 0;
+        @extend %shadow;
+        border-radius: $border-radius;
+    }
+
+    &--card &__buttons,
+    &--section &__buttons {
+        padding: map_get($spaces, "4");
     }
 }

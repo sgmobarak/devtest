@@ -24,13 +24,22 @@ Vue.component('board-section', {
             vm.record = JSON.parse(JSON.stringify(vm.section));
         }
     },
+    watch: {
+        'record.cards': {
+            handler(val, oldVal) {
+                console.log(val)
+            },
+            deep: true,
+        }
+    },
     computed: {
-        getCards() {
+        card_list() {
             let vm = this;
-            return vm.hasCards ? vm.record.cards : [];
+            return vm.has_cards ? vm.record.cards : [];
         },
-        hasCards() {
+        has_cards() {
             let vm = this;
+
             return vm.record &&
                 vm.record.cards &&
                 Array.isArray(vm.record.cards) &&
@@ -44,11 +53,13 @@ Vue.component('board-section', {
             this.$modal.show({
                 template: `<div class="dialog-content">
                     <form v-if="record && record.id" class="form" @submit.prevent="updateCard()">
-                        <textarea :ref="'input_title'" class="form_input" v-model="record.title" placeholder="Title" />
-                        <textarea :ref="'input_description'" class="form_input" v-model="record.description" placeholder="Description" />
+                        <div class="form__controls">
+                            <textarea rows="2" :ref="'input_title'" class="form__controls__input" v-model="record.title" placeholder="Title" />
+                            <textarea rows="4" :ref="'input_description'" class="form__controls__input" v-model="record.description" placeholder="Description" />
+                        </div>
                         <div class="form__buttons">
-                            <button type="button" class="form_button" @click.prevent="closeModal()">Cancel</button>
-                            <button type="submit" class="form_button form_button--active">Save</button>
+                            <button type="button" class="form__buttons__button" @click.prevent="closeModal()">Cancel</button>
+                            <button type="submit" class="form__buttons__button form__buttons__button--active">Save</button>
                         </div>
                     </form>
                 </div>`,
@@ -165,7 +176,7 @@ Vue.component('board-section', {
                 .post('/api/cards', vm.card)
                 .then(response => {
                     const card = response.data;
-                    // update the dataset
+
                     vm.record.cards.push(card);
                     vm.card = null;
 
@@ -204,7 +215,6 @@ Vue.component('board-section', {
             let cards = JSON.parse(JSON.stringify(vm.record.cards));
 
             if (Array.isArray(cards) && card && card.id) {
-                console.log(card)
                 let i = cards.findIndex(function (c) {
                     return c.id === card.id;
                 });
@@ -229,8 +239,8 @@ Vue.component('board-section', {
             {{ record.title }}
         </div>
         <div class="column__content__body">
-            <div v-if="hasCards==true">
-                <div v-for="rec in getCards" :key="'card_' + rec.id" @click.prevent="editCard(rec)">
+            <div v-if="has_cards==true">
+                <div v-for="rec in card_list" :key="'card_' + rec.id" @click.prevent="editCard(rec)">
                     <board-section-card :card="rec" @deleted="cardRemoved" @updated="cardUpdated" />
                 </div>
             </div>
@@ -243,10 +253,14 @@ Vue.component('board-section', {
                 </p>
             </div>
 
-            <form v-if="card!=null && card.id==''" class="form" @submit.prevent="storeCard()">
-                <textarea :ref="'input_title'" class="form_input" v-model="card.title" placeholder="Title" />
-                <button type="button" class="form_button" @click.prevent="cancelCard()">Cancel</button>
-                <button type="submit" class="form_button form_button--active">Save</button>
+            <form v-if="card!=null && card.id==''" class="form form--card" @submit.prevent="storeCard()">
+                <div class="form__controls">
+                    <textarea :ref="'input_title'" class="form__controls__input" v-model="card.title" placeholder="Title" />
+                </div>
+                <div class="form__buttons">
+                    <button type="button" class="form__buttons__button" @click.prevent="cancelCard()">Cancel</button>
+                    <button type="submit" class="form__buttons__button form__buttons__button--active">Save</button>
+                </div>
             </form>
         </div>
         <div class="column__content__footer">

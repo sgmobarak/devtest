@@ -35,7 +35,10 @@
 
             <div class="header__nav">
                 @if(auth()->check())
-                <form class="header__nav_item" method="POST" action="{{ route('logout') }}">
+                <span class="header__nav__item">
+                    Hello {{auth()->user()->name}},
+                </span>
+                <form class="header__nav__item" method="POST" action="{{ route('logout') }}">
                     @csrf
                     <a href="route('logout')" onclick="event.preventDefault();
                                         this.closest('form').submit();">
@@ -44,7 +47,7 @@
                 </form>
                 @endif
 
-                <a class="header__nav_item" href="{{route('download.dbdump')}}">
+                <a class="header__nav__item" href="{{route('download.dbdump')}}">
                     Download DB
                 </a>
             </div>
