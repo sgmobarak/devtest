@@ -39,7 +39,7 @@ After running the db:seed there will be 10 users inserted in to users table. Jus
 ## Demo
 
 **URL**
-[http://devtest.learnkey.eu/] (http://devtest.learnkey.eu/)
+http://devtest.learnkey.eu/
 
 **Login**
 kenna13@example.com
