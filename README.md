@@ -1,9 +1,11 @@
 
+<p align="center"><a href="http://devtest.learnkey.eu" target="_blank"><img src="http://devtest.learnkey.eu/img/devtest-screenshot.jpg" width="600"></a></p>
+
 ## Project Overview
 
 This is a Skills (Laravel, MySQL, Vue.js) Assessment Test project.
 
-## Tech Stack:
+## Tech Stack
 
 1. PHP (^7.3) and Laravel (^8.54) - Used for all the back-end operations
 2. VueJS 2 (https://vuejs.org/v2/guide/) - Used for all front-end operations, did not use any other library or addon, anything not included with vue will have to be done with Vanilla js (http://vanilla-js.com/)
@@ -19,7 +21,7 @@ Please note that I have used laravel/breeze starter kit for user authentication 
 - Node (at least v12.14.1)
 - Composer
 
-### Instalation
+### Installation
 
 Copy .env.example file to .env and make necessary changes accordingly. The run following commands on Terminal.
 
@@ -33,4 +35,19 @@ Copy .env.example file to .env and make necessary changes accordingly. The run f
 ## Login
 
 After running the db:seed there will be 10 users inserted in to users table. Just pick one email address from there as login, and use "password" keyword as password.
+
+## Demo
+
+**URL**
+[http://devtest.learnkey.eu/] (http://devtest.learnkey.eu/)
+
+**Login**
+kenna13@example.com
+
+**Password**
+password
+
+--
+Thank you
+
 
