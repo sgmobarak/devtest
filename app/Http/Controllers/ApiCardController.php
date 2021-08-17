@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Card\StoreRequest;
+use App\Http\Requests\Card\UpdateRequest;
 use App\Models\Card;
 use Illuminate\Http\Request;
 
@@ -23,16 +25,11 @@ class ApiCardController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreRequest $request)
     {
-        $request->validate([
-            'title' => 'required|max:255',
-            'section_id' => 'required|integer'
-        ]);
-
         try {
             // insert the section record
-            $model = Card::create($request->all());
+            $model = Card::create($request->validated());
         } catch (\Exception $e) {
             // for now throw the exception
             throw $e;
@@ -59,23 +56,19 @@ class ApiCardController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UpdateRequest $request, $id)
     {
         $model =
             Card::findOrFail($id);
 
-        $request->validate([
-            'title' => 'required|max:255',
-            'section_id' => 'required|integer',
-            'description' => 'nullable'
-        ]);
+        $validated = $request->validated();
 
         try {
-            $model->title = $request->post('title');
-            $model->section_id = $request->post('section_id');
-            $model->description = $request->post('description');
+            //$model->title = $request->post('title');
+            //$model->section_id = $request->post('section_id');
+            //$model->description = $request->post('description');
 
-            $model->save();
+            $model->update($validated);
         } catch (\Exception $e) {
             // for now throw the exception
             throw $e;

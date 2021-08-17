@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Section\StoreRequest;
 use App\Models\Section;
 use Illuminate\Http\Request;
 
@@ -26,15 +27,11 @@ class ApiSectionController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreRequest $request)
     {
-        $request->validate([
-            'title' => 'required|max:255',
-        ]);
-
         try {
             // insert the section record
-            $model = Section::create($request->all());
+            $model = Section::create($request->validated());
         } catch (\Exception $e) {
             // for now throw the exception
             throw $e;
