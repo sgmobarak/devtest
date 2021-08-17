@@ -47,7 +47,7 @@
                 </form>
                 @endif
 
-                <a class="header__nav__item" href="{{route('download.dbdump')}}">
+                <a class="header__nav__item header__nav__item--button" href="{{route('download.dbdump')}}">
                     Download DB
                 </a>
             </div>

@@ -19,6 +19,22 @@
     color: $white;
 }
 
+%link-button {
+    text-decoration: none;
+    background: $gray-100;
+    border: 1px solid $gray-300;
+    border-radius: $border-radius;
+    margin: 0.25rem;
+    padding: 0.15rem 0.5rem;
+}
+
+%link-button-effect {
+    text-decoration: none;
+    background: $blue;
+    color: $white;
+    border: 1px solid $blue;
+}
+
 .clearfix {
     @include clearfix();
 }
@@ -104,6 +120,23 @@
 
         &__item {
             margin: map_get($spaces, "4") map_get($spaces, "3");
+
+            &--button {
+                @extend %link-button;
+                background: $blue;
+                border-color: $blue;
+                color: $white;
+
+                &:first-child {
+                    margin-right: 0;
+                }
+
+                &:hover,
+                &:focus-visible,
+                &:focus {
+                    @extend %link-button-effect;
+                }
+            }
         }
     }
 }
@@ -201,11 +234,11 @@
             flex: 1 1 auto;
             overflow-y: auto;
             overflow-x: hidden;
-            margin: 0 4px;
-            padding: 0 4px;
+            padding: 8px;
             z-index: 1;
             min-height: 50px;
             background-color: map_get($grays, "200");
+            border-radius: $border-radius;
         }
         &__footer {
             height: 40px;
@@ -223,7 +256,6 @@
     padding: map_get($spaces, "2");
     border-radius: $border-radius;
     box-shadow: $box-shadow;
-    margin-top: map_get($spaces, "3");
     margin-bottom: map_get($spaces, "3");
 
     &__body {
@@ -232,6 +264,26 @@
 
         &__title {
             display: block;
+        }
+    }
+
+    &__footer {
+        padding-top: map-get($spaces, "2");
+        display: inline-block;
+
+        &__item {
+            @extend %link-button;
+            font-size: 80%;
+
+            &:first-child {
+                margin-left: 0;
+            }
+
+            &:hover,
+            &:focus-visible,
+            &:focus {
+                @extend %link-button-effect;
+            }
         }
     }
 }
@@ -244,15 +296,22 @@
 
     &__controls {
         margin-bottom: map_get($spaces, "1");
+
+        &__label {
+            display: block;
+            margin-bottom: map_get($spaces, "4");
+            font-weight: 500;
+        }
+
         &__input {
             width: 100%;
-            padding: map_get($spaces, "4");
+            padding: map_get($spaces, "4") map_get($spaces, "3");
             border: 1px solid $border-color;
             border-radius: $border-radius;
             outline-color: $border-color;
 
             &:focus-visible {
-                outline-color: $border-color;
+                outline-color: $blue;
             }
         }
     }

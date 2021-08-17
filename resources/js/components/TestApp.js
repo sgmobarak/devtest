@@ -1,4 +1,3 @@
-require('./Section');
 
 const Vue = window.vue;
 
@@ -6,9 +5,24 @@ const state = Vue.observable({
     sections: []
 });
 
+// few global functions
 const getSections = () => {
     return Array.isArray(state.sections) ? state.sections : [];
 }
+
+const getSection = (id) => {
+    if (Array.isArray(state.sections) && id) {
+        let i = state.sections.findIndex(function (c) {
+            return c.id === id;
+        });
+
+        if (i > -1) {
+            return state.sections[i];
+        }
+    }
+
+    return null;
+};
 
 const updateSections = (sections) => {
     state.sections = sections;
@@ -28,16 +42,11 @@ const getSectionCards = (id) => {
     return [];
 };
 
-/**
- * these below components code can be stored in separate files
- * I have these same code in ./Section.js and ./Card.js
- * to compile these codes from files, all we need to remove these lines and 
- * add a line on top of this file
- * require('./Section');
- * 
+// end of global functions
 
 Vue.use(window.VueJSModal);
 
+// <board-section/> component for board columns
 Vue.component('board-section', {
     props: {
         section: {
@@ -59,9 +68,17 @@ Vue.component('board-section', {
         }
     },
     watch: {
-        'record.cards': {
+        'section.cards': {
             handler(val, oldVal) {
-                console.log(val)
+                //
+            },
+            deep: true,
+        },
+        'section': {
+            handler(val, oldVal) {
+                if (val) {
+                    this.record = JSON.parse(JSON.stringify(val));
+                }
             },
             deep: true,
         }
@@ -87,11 +104,21 @@ Vue.component('board-section', {
             this.$modal.show({
                 template: `<div class="dialog-content">
                     <form v-if="record && record.id" class="form" @submit.prevent="updateCard()">
-                        <textarea :ref="'input_title'" class="form_input" v-model="record.title" placeholder="Title" />
-                        <textarea :ref="'input_description'" class="form_input" v-model="record.description" placeholder="Description" />
+                        <div class="form__controls">
+                            <label class="form__controls__label">Title:</label>
+                            <textarea rows="2" :ref="'input_title'" class="form__controls__input" v-model="record.title" placeholder="e.g. Configure Sever" />
+                            
+                            <label class="form__controls__label">Description:</label>
+                            <textarea rows="4" :ref="'input_description'" class="form__controls__input" v-model="record.description" placeholder="e.g. All necessary software should be installed" />
+
+                            <label class="form__controls__label">Move to:</label>
+                            <select class="form__controls__input" v-model="record.section_id">
+                                <option v-for="s in sections" :key="'sec_' + s.id" :value="s.id">{{s.title}}</option>
+                            </select>
+                        </div>
                         <div class="form__buttons">
-                            <button type="button" class="form_button" @click.prevent="closeModal()">Cancel</button>
-                            <button type="submit" class="form_button form_button--active">Save</button>
+                            <button type="submit" class="form__buttons__button form__buttons__button--active">Save</button>
+                            <button type="button" class="form__buttons__button" @click.prevent="closeModal()">Cancel</button>
                         </div>
                     </form>
                 </div>`,
@@ -109,6 +136,14 @@ Vue.component('board-section', {
                 mounted() {
                     if (this.card) {
                         this.record = JSON.parse(JSON.stringify(this.card));
+                    }
+                },
+                computed: {
+                    sections() {
+                        return getSections();
+                    },
+                    has_sections() {
+                        return getSections().length > 0;
                     }
                 },
                 methods: {
@@ -152,8 +187,9 @@ Vue.component('board-section', {
                 card: vm.card
             }, {
                 name: "cardEditor",
-                adaptive: true,
-                clickToClose: false
+                adaptive: false,
+                clickToClose: false,
+                height: "auto"
             }, {
                 'before-close': vm.cancelCard
             })
@@ -164,10 +200,10 @@ Vue.component('board-section', {
 
                 // call the api to remove it from database
                 axios
-                    .post('/api/sections/' + vm.section.id, { _method: 'DELETE' })
+                    .post('/api/sections/' + vm.record.id, { _method: 'DELETE' })
                     .then(response => {
                         // let the parent know about this action
-                        vm.$emit('deleted', vm.section);
+                        vm.$emit('deleted', vm.record);
                     })
                     .catch(error => {
                         console.log(error.response);
@@ -208,15 +244,23 @@ Vue.component('board-section', {
                 .post('/api/cards', vm.card)
                 .then(response => {
                     const card = response.data;
+                    let _section = JSON.parse(JSON.stringify(vm.record));
 
-                    vm.record.cards.push(card);
+                    if (!Array.isArray(_section.cards)) {
+                        _section.cards = [];
+                    }
+
+                    _section.cards.push(card);
+                    vm.record = _section;
+
                     vm.card = null;
 
                     // let the parent know about this action
                     vm.$emit('updated', vm.record);
                 })
                 .catch(error => {
-                    alert('Oops! Something went wrong.')
+                    console.log(error);
+                    alert('Oops! Something went wrong....');
                 })
                 .finally(() => {
                     // do nothing
@@ -244,20 +288,34 @@ Vue.component('board-section', {
         },
         cardUpdated(card) {
             let vm = this;
-            let cards = JSON.parse(JSON.stringify(vm.record.cards));
 
-            if (Array.isArray(cards) && card && card.id) {
-                let i = cards.findIndex(function (c) {
-                    return c.id === card.id;
-                });
+            if (card.section_id !== vm.record.id) {
+                // moving the card to another section
+                let sec = getSection(card.section_id);
 
-                if (i > -1) cards[i] = card;
+                if (Array.isArray(sec.cards) && card && card.id) {
+                    sec.cards.push(card);
 
-                vm.record.cards = JSON.parse(JSON.stringify(cards));
+                    // let the parent know about this action
+                    vm.$emit('updated', sec);
+                }
 
-                // let the parent know about this action
-                vm.$emit('updated', vm.record);
+                // remove from existing
+                const i = vm.record.cards.indexOf(card);
+                vm.record.cards.splice(i, 1);
+            } else {
+                if (Array.isArray(vm.record.cards) && card && card.id) {
+                    let i = vm.record.cards.findIndex(function (c) {
+                        return c.id === card.id;
+                    });
+
+                    if (i > -1) vm.record.cards[i] = card;
+                }
             }
+
+            // let the parent know about this action
+            vm.$emit('updated', vm.record);
+
         }
     },
     template: `
@@ -273,7 +331,7 @@ Vue.component('board-section', {
         <div class="column__content__body">
             <div v-if="has_cards==true">
                 <div v-for="rec in card_list" :key="'card_' + rec.id" @click.prevent="editCard(rec)">
-                    <board-section-card :card="rec" @deleted="cardRemoved" @updated="cardUpdated" />
+                    <board-section-card :card="rec" @edit="editCard" @deleted="cardRemoved" @updated="cardUpdated" />
                 </div>
             </div>
             <div v-else-if="card==null">
@@ -285,10 +343,14 @@ Vue.component('board-section', {
                 </p>
             </div>
 
-            <form v-if="card!=null && card.id==''" class="form" @submit.prevent="storeCard()">
-                <textarea :ref="'input_title'" class="form_input" v-model="card.title" placeholder="Title" />
-                <button type="button" class="form_button" @click.prevent="cancelCard()">Cancel</button>
-                <button type="submit" class="form_button form_button--active">Save</button>
+            <form v-if="card!=null && card.id==''" class="form form--card" @submit.prevent="storeCard()">
+                <div class="form__controls">
+                    <textarea :ref="'input_title'" class="form__controls__input" v-model="card.title" placeholder="Title" />
+                </div>
+                <div class="form__buttons">
+                    <button type="submit" class="form__buttons__button form__buttons__button--active">Save</button>
+                    <button type="button" class="form__buttons__button" @click.prevent="cancelCard()">Cancel</button>
+                </div>
             </form>
         </div>
         <div class="column__content__footer">
@@ -300,6 +362,7 @@ Vue.component('board-section', {
     `
 });
 
+// <board-section-card/> component for cards inside column
 Vue.component('board-section-card', {
     props: {
         card: {
@@ -322,7 +385,6 @@ Vue.component('board-section-card', {
     watch: {
         'card': {
             handler(val, oldVal) {
-
                 if (val) {
                     this.record = JSON.parse(JSON.stringify(val));
                 }
@@ -331,16 +393,18 @@ Vue.component('board-section-card', {
         }
     },
     methods: {
+        edit() {
+            this.$emit('edit', this.record);
+        },
         remove() {
             let vm = this;
             if (confirm('Are you sure to delete this card?')) {
-
                 // call the api to remove it from database
                 axios
-                    .post(vm.api_url, { _method: 'DELETE' })
+                    .post('/api/cards/' + vm.record.id, { _method: 'DELETE' })
                     .then(response => {
                         // let the parent know about this action
-                        vm.$emit('deleted', vm.card);
+                        vm.$emit('deleted', vm.record);
                     })
                     .catch(error => {
                         console.log(error.response);
@@ -350,6 +414,8 @@ Vue.component('board-section-card', {
                         // do nothing
                     });
             }
+
+            return false;
         },
     },
     template: `
@@ -359,13 +425,19 @@ Vue.component('board-section-card', {
                 {{ record.title }}
             </span>
         </div>
+        <div class="card__footer">
+            <a class="card__footer__item" href="#" @click.stop.prevent="edit()">
+                Edit
+            </a>
+            <a class="card__footer__item" href="#" @click.stop.prevent="remove()">
+                Delete
+            </a>
+        </div>
     </div>
     `
 });
 
- * end of components
- */
-
+// building the app to use components
 const app = new Vue({
     el: '#app',
     data: {
@@ -380,13 +452,9 @@ const app = new Vue({
     },
     computed: {
         section_list() {
-            let vm = this;
-            //return vm.has_sections ? vm.sections : [];
             return getSections();
         },
         has_sections() {
-            let vm = this;
-            //return vm.sections && Array.isArray(vm.sections) && vm.sections.length > 0;
             return getSections().length > 0;
         }
     },
