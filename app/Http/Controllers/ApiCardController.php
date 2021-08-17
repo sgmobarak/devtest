@@ -58,8 +58,7 @@ class ApiCardController extends Controller
      */
     public function update(UpdateRequest $request, $id)
     {
-        $model =
-            Card::findOrFail($id);
+        $model = Card::findOrFail($id);
 
         $validated = $request->validated();
 

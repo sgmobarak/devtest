@@ -176,6 +176,7 @@ Vue.component('board-section', {
                                 mvm.closeModal();
                             })
                             .catch(error => {
+                                console.log(error);
                                 alert('Oops! Something went wrong.')
                             })
                             .finally(() => {
@@ -260,7 +261,7 @@ Vue.component('board-section', {
                 })
                 .catch(error => {
                     console.log(error);
-                    alert('Oops! Something went wrong....');
+                    alert('Oops! Something went wrong.');
                 })
                 .finally(() => {
                     // do nothing
@@ -289,11 +290,11 @@ Vue.component('board-section', {
         cardUpdated(card) {
             let vm = this;
 
-            if (card.section_id !== vm.record.id) {
+            if (card.section_id != vm.record.id) {
                 // moving the card to another section
                 let sec = getSection(card.section_id);
 
-                if (Array.isArray(sec.cards) && card && card.id) {
+                if (sec && Array.isArray(sec.cards) && card && card.id) {
                     sec.cards.push(card);
 
                     // let the parent know about this action
@@ -303,14 +304,12 @@ Vue.component('board-section', {
                 // remove from existing
                 const i = vm.record.cards.indexOf(card);
                 vm.record.cards.splice(i, 1);
-            } else {
-                if (Array.isArray(vm.record.cards) && card && card.id) {
-                    let i = vm.record.cards.findIndex(function (c) {
-                        return c.id === card.id;
-                    });
+            } else if (vm.record && Array.isArray(vm.record.cards) && card && card.id) {
+                let i = vm.record.cards.findIndex(function (c) {
+                    return c.id === card.id;
+                });
 
-                    if (i > -1) vm.record.cards[i] = card;
-                }
+                if (i > -1) vm.record.cards[i] = card;
             }
 
             // let the parent know about this action
@@ -511,10 +510,12 @@ const app = new Vue({
 
                     vm.sections.push(section);
                     vm.section = null;
+
                     vm.updateStore();
                 })
                 .catch(error => {
-                    alert('Oops! Something went wrong.')
+                    console.log(error);
+                    alert('Oops! Something went wrong.');
                 })
                 .finally(() => {
                     // do nothing
