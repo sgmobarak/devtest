@@ -16,7 +16,6 @@ Please note that I have used laravel/breeze starter kit for user authentication 
 ### Prerequisite
 
 - PHP (^7.3)
-- Laravel Framework (^8.54)
 - MySQL
 - Node (at least v12.14.1)
 - Composer
